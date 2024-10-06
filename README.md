@@ -1,1 +1,1 @@
-# cwru-courses-backend-
+# cwru-courses-backend
