@@ -1,11 +1,7 @@
 package com.example.lambda.models;
 
-
-
-import java.time.Instant;
-
-
 public class Review {
+    private String reviewId;
     private String createdBy;
     private Double overall;
     private Double difficulty;
@@ -14,13 +10,22 @@ public class Review {
     private Boolean anonymous;
     private String additionalComments;
     private String tips;
-    private Instant createdAt;
+    private String createdAt;
     private String professor;
 
     public Review() {
         // Default constructor
     }
 
+    // Getters and setters for all fields
+
+    public String getReviewId() {
+        return reviewId;
+    }
+
+    public void setReviewId(String reviewId) {
+        this.reviewId = reviewId;
+    }
 
     public String getCreatedBy() {
         return createdBy;
@@ -30,7 +35,6 @@ public class Review {
         this.createdBy = createdBy;
     }
 
-
     public Double getOverall() {
         return overall;
     }
@@ -38,7 +42,6 @@ public class Review {
     public void setOverall(Double overall) {
         this.overall = overall;
     }
-
 
     public Double getDifficulty() {
         return difficulty;
@@ -48,7 +51,6 @@ public class Review {
         this.difficulty = difficulty;
     }
 
-
     public Double getUsefulness() {
         return usefulness;
     }
@@ -56,7 +58,6 @@ public class Review {
     public void setUsefulness(Double usefulness) {
         this.usefulness = usefulness;
     }
-
 
     public String getMajor() {
         return major;
@@ -66,7 +67,6 @@ public class Review {
         this.major = major;
     }
 
-
     public Boolean getAnonymous() {
         return anonymous;
     }
@@ -74,7 +74,6 @@ public class Review {
     public void setAnonymous(Boolean anonymous) {
         this.anonymous = anonymous;
     }
-
 
     public String getAdditionalComments() {
         return additionalComments;
@@ -84,7 +83,6 @@ public class Review {
         this.additionalComments = additionalComments;
     }
 
-
     public String getTips() {
         return tips;
     }
@@ -93,15 +91,13 @@ public class Review {
         this.tips = tips;
     }
 
-
-    public Instant getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
-
 
     public String getProfessor() {
         return professor;
@@ -109,5 +105,22 @@ public class Review {
 
     public void setProfessor(String professor) {
         this.professor = professor;
+    }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "reviewId='" + reviewId + '\'' +
+                ", createdBy='" + createdBy + '\'' +
+                ", overall=" + overall +
+                ", difficulty=" + difficulty +
+                ", usefulness=" + usefulness +
+                ", major='" + major + '\'' +
+                ", anonymous=" + anonymous +
+                ", additionalComments='" + additionalComments + '\'' +
+                ", tips='" + tips + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", professor='" + professor + '\'' +
+                '}';
     }
 }

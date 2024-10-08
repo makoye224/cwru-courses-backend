@@ -20,7 +20,7 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
 
     // Instantiate handler classes with injected DAOs
     private final CoursesHandler coursesHandler = new CoursesHandler(courseDao);
-    private final ReviewsHandler reviewsHandler = new ReviewsHandler();
+    private final ReviewsHandler reviewsHandler = new ReviewsHandler(courseDao);
     private final AuthenticationHandler authenticationHandler = new AuthenticationHandler();
 
 
@@ -36,15 +36,18 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         logger.info("Body: {}", body);
 
         String courseId = null;
+        String reviewId = null;
 
         // Extract courseId from the path parameters (if it's part of the path)
         if (input.getPathParameters() != null) {
             courseId = input.getPathParameters().get("courseId");
+            reviewId = input.getPathParameters().get("reviewId");
         }
 
         // If courseId is not found in path parameters, check if it's in query string parameters
         if (courseId == null && input.getQueryStringParameters() != null) {
             courseId = input.getQueryStringParameters().get("courseId");
+            reviewId = input.getQueryStringParameters().get("reviewId");
         }
 
         // Log the extracted courseId
@@ -57,7 +60,7 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         if (path.startsWith("/courses")) {
             response = coursesHandler.handleCoursesRequest(httpMethod, body, courseId);
         } else if (path.startsWith("/reviews")) {
-            response = reviewsHandler.handleReviewsRequest(httpMethod, body);
+            response = reviewsHandler.handleReviewsRequest(httpMethod, body, courseId, reviewId);
         } else if (path.startsWith("/authenticate")) {
             response = authenticationHandler.handleAuthenticationRequest(httpMethod, body);
         } else {

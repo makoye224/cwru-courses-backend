@@ -1,7 +1,8 @@
 package com.example.lambda.dao;
 
 import com.example.lambda.models.Course;
-import com.google.gson.Gson;
+import com.example.lambda.models.CourseOutput;
+import com.example.lambda.util.CourseConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.enhanced.dynamodb.*;
@@ -19,7 +20,6 @@ import java.util.List;
 public class CourseDao {
     private static final Logger logger = LoggerFactory.getLogger(CourseDao.class);
     private final DynamoDbTable<Course> courseTable;
-    private final Gson gson = new Gson();  // Gson instance for JSON conversions
 
     // Constructor to initialize the DynamoDbEnhancedClient and table
     public CourseDao() {
@@ -40,15 +40,7 @@ public class CourseDao {
     // Method to save a course using DynamoDbEnhancedClient
     public void saveCourse(Course course) {
         try {
-            // Convert aliases and reviews to JSON strings before saving
-            if (course.getAliases() != null) {
-                course.setAliasesJson(gson.toJson(course.getAliases()));
-            }
-            if (course.getReviews() != null) {
-                course.setReviewsJson(gson.toJson(course.getReviews()));
-            }
-
-            // Save the course to the DynamoDB table
+            // Save the course directly to DynamoDB
             courseTable.putItem(course);
             logger.info("Successfully saved course: " + course.getTitle());
         } catch (Exception e) {
@@ -57,30 +49,21 @@ public class CourseDao {
     }
 
     // Get a course using only the courseId (primary key)
-    public Course getCourseById(String courseId) {
+    public CourseOutput getCourseById(String courseId) {
         Course course = courseTable.getItem(Key.builder()
                 .partitionValue(courseId)
                 .build());
 
         if (course != null) {
-            try {
-                // Convert JSON string back to list for aliases and reviews
-                if (course.getAliasesJson() != null) {
-                    course.setAliases(gson.fromJson(course.getAliasesJson(), List.class));
-                }
-                if (course.getReviewsJson() != null) {
-                    course.setReviews(gson.fromJson(course.getReviewsJson(), List.class));
-                }
-            } catch (Exception e) {
-                logger.error("Failed to deserialize JSON", e);
-            }
+            // Use the CourseConverter to handle deserialization
+            return CourseConverter.convertToCourseOutput(course);
+        } else {
+            return null;  // No course found
         }
-
-        return course;
     }
 
     // Get all courses created by a specific user using the "CreatedByIndex" GSI
-    public List<Course> getCoursesByCreatedBy(String createdBy) {
+    public List<CourseOutput> getCoursesByCreatedBy(String createdBy) {
         DynamoDbIndex<Course> createdByIndex = courseTable.index("CreatedByIndex");
 
         QueryEnhancedRequest queryRequest = QueryEnhancedRequest.builder()
@@ -89,30 +72,40 @@ public class CourseDao {
                         .build()))
                 .build();
 
-        List<Course> courses = new ArrayList<>();
+        List<CourseOutput> courseOutputs = new ArrayList<>();
         Iterator<Page<Course>> results = createdByIndex.query(queryRequest).iterator();
 
         while (results.hasNext()) {
             Page<Course> page = results.next();
-            courses.addAll(page.items());
+            page.items().forEach(course -> courseOutputs.add(CourseConverter.convertToCourseOutput(course)));
         }
 
-        return courses;
+        return courseOutputs;
     }
 
     // Get all courses (scans the entire table)
-    public List<Course> getAllCourses() {
+    public List<CourseOutput> getAllCourses() {
         // Create a scan request to retrieve all courses
         ScanEnhancedRequest scanRequest = ScanEnhancedRequest.builder().build();
 
         // Use the scan operation to get all courses
-        List<Course> courseList = new ArrayList<>();
-        courseTable.scan(scanRequest).items().forEach(courseList::add);
+        List<CourseOutput> courseOutputs = new ArrayList<>();
+        courseTable.scan(scanRequest).items().forEach(course -> courseOutputs.add(CourseConverter.convertToCourseOutput(course)));
 
-        return courseList;  // Return the list of all courses
+        return courseOutputs;  // Return the list of all courses
     }
 
-    public void deleteCourseById(String courseId) {
+    // Method to delete a course using DynamoDbEnhancedClient
+    public void deleteCourse(String courseId) {
+        try {
+            // Delete the course by courseId
+            courseTable.deleteItem(Key.builder()
+                    .partitionValue(courseId)
+                    .build());
 
+            logger.info("Successfully deleted course with courseId: " + courseId);
+        } catch (Exception e) {
+            logger.error("Failed to delete course", e);
+        }
     }
 }

@@ -4,7 +4,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 
-import java.util.List;
 
 @DynamoDbBean
 public class Course {
@@ -15,14 +14,11 @@ public class Course {
     private String description;
 
     // Store lists as JSON strings in DynamoDB
-    private String aliasesJson;  // JSON string for aliases
-    private String reviewsJson;  // JSON string for reviews
+    private String aliases;  // JSON string for aliases
+    private String prerequisites;  // JSON string for prerequisites
+    private String reviews;  // JSON string for reviews
 
-    // Transient fields (not saved to DynamoDB) to store deserialized list versions
-    private List<String> aliases;
-    private List<String> prerequisites;
-    private List<String> reviews;
-
+    // Constructor
     public Course() {
         // Default constructor
     }
@@ -56,7 +52,7 @@ public class Course {
         this.title = title;
     }
 
-    @DynamoDbAttribute("created at")
+    @DynamoDbAttribute("createdAt")
     public String getCreatedAt() {
         return createdAt;
     }
@@ -75,47 +71,32 @@ public class Course {
     }
 
     // Store aliases as JSON string in DynamoDB
-    @DynamoDbAttribute("aliasesJson")
-    public String getAliasesJson() {
-        return aliasesJson;
-    }
-
-    public void setAliasesJson(String aliasesJson) {
-        this.aliasesJson = aliasesJson;
-    }
-
-    // Store reviews as JSON string in DynamoDB
-    @DynamoDbAttribute("reviewsJson")
-    public String getReviewsJson() {
-        return reviewsJson;
-    }
-
-    public void setReviewsJson(String reviewsJson) {
-        this.reviewsJson = reviewsJson;
-    }
-
-    // These fields are transient and not stored directly in DynamoDB as lists
-    public List<String> getAliases() {
+    @DynamoDbAttribute("aliases")
+    public String getAliases() {
         return aliases;
     }
 
-    public void setAliases(List<String> aliases) {
+    public void setAliases(String aliases) {
         this.aliases = aliases;
     }
 
-    public List<String> getPrerequisites() {
+    // Store prerequisites as JSON string in DynamoDB
+    @DynamoDbAttribute("prerequisites")
+    public String getPrerequisites() {
         return prerequisites;
     }
 
-    public void setPrerequisites(List<String> prerequisites) {
+    public void setPrerequisites(String prerequisites) {
         this.prerequisites = prerequisites;
     }
 
-    public List<String> getReviews() {
+    // Store reviews as JSON string in DynamoDB
+    @DynamoDbAttribute("reviews")
+    public String getReviews() {
         return reviews;
     }
 
-    public void setReviews(List<String> reviews) {
+    public void setReviews(String reviews) {
         this.reviews = reviews;
     }
 
