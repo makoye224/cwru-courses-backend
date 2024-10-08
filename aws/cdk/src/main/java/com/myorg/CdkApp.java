@@ -4,39 +4,27 @@ import software.amazon.awscdk.App;
 import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.StackProps;
 
-import java.util.Arrays;
-
 public class CdkApp {
     public static void main(final String[] args) {
         App app = new App();
 
-        new CdkStack(app, "CdkStack", StackProps.builder()
-                // If you don't specify 'env', this stack will be environment-agnostic.
-                // Account/Region-dependent features and context lookups will not work,
-                // but a single synthesized template can be deployed anywhere.
-
-                // Uncomment the next block to specialize this stack for the AWS Account
-                // and Region that are implied by the current CLI configuration.
-
+        // Create the DynamoDB Stack
+        DynamoDbStack dynamoDbStack = new DynamoDbStack(app, "DynamoDbStack", StackProps.builder()
                 .env(Environment.builder()
-                        .account(System.getenv("CDK_DEFAULT_ACCOUNT"))
-                        .region(System.getenv("CDK_DEFAULT_REGION"))
-                        .build())
-
-
-                // Uncomment the next block if you know exactly what Account and Region you
-                // want to deploy the stack to.
-                /*
-                .env(Environment.builder()
-                        .account("123456789012")
+                        .account("955039243667")
                         .region("us-east-1")
                         .build())
-                */
-
-                // For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
                 .build());
 
+        // Create the CDK stack that uses the DynamoDB tables
+        new CdkStack(app, "CdkStack", StackProps.builder()
+                .env(Environment.builder()
+                        .account("955039243667")
+                        .region("us-east-1")
+                        .build())
+                .build(), dynamoDbStack);
+
+        // Synthesize the application
         app.synth();
     }
 }
-

@@ -1,40 +1,56 @@
 package com.myorg;
 
+import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.services.lambda.*;
 import software.amazon.awscdk.services.apigateway.*;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.constructs.Construct;
+import software.amazon.awscdk.services.dynamodb.*;
+
+import java.util.Map;
 
 public class CdkStack extends Stack {
-    public CdkStack(final Construct scope, final String id) {
-        this(scope, id, null);
+    public CdkStack(final Construct scope, final String id, final DynamoDbStack dynamoDbStack) {
+        this(scope, id, null, dynamoDbStack);
     }
 
-    public CdkStack(final Construct scope, final String id, final StackProps props) {
+    public CdkStack(final Construct scope, final String id, final StackProps props, final DynamoDbStack dynamoDbStack) {
         super(scope, id, props);
 
-        // Define the Lambda function
-        Function lambdaFunction = Function.Builder.create(this, "EchoLambdaFunction")
+        // Define the Lambda function for proxy handling
+        Function proxyLambdaFunction = Function.Builder.create(this, "ProxyLambdaFunction")
                 .runtime(Runtime.JAVA_17)
-                .handler("com.example.lambda.App::handleRequest") // The handler method for Lambda
+                .handler("com.example.lambda.App::handleRequest") // Single handler for all routes
                 .code(Code.fromAsset("../lambda/target/lambda-1.0-SNAPSHOT.jar")) // Path to the Lambda JAR
+                .environment(Map.of(
+                        "COURSES_TABLE", dynamoDbStack.coursesTable.getTableName() // Single table for both courses and reviews
+                ))
+                .memorySize(512)
+                .timeout(Duration.seconds(30))
                 .build();
 
-        // Define the API Gateway with /echo endpoint
-        RestApi api = RestApi.Builder.create(this, "EchoApi")
-                .restApiName("Echo Service")
-                .description("An API Gateway for echoing strings.")
+        // Grant Lambda function permissions to read and write to the DynamoDB table
+        dynamoDbStack.coursesTable.grantReadWriteData(proxyLambdaFunction);
+
+        // Define the API Gateway
+        RestApi api = RestApi.Builder.create(this, "CourseReviewApi")
+                .restApiName("Course Review Service")
+                .description("An API Gateway for managing courses, reviews, and authentication.")
                 .build();
 
-        // Define the /echo resource in the API Gateway
-        Resource echoResource = api.getRoot().addResource("echo");
+        // Define the /courses resource
+        Resource coursesResource = api.getRoot().addResource("courses");
+        LambdaIntegration proxyIntegration = new LambdaIntegration(proxyLambdaFunction);
+        coursesResource.addMethod("ANY", proxyIntegration); // Use ANY to support all HTTP methods
 
-        // Integrate the Lambda function with the /echo resource
-        LambdaIntegration echoIntegration = new LambdaIntegration(lambdaFunction);
+        // Define the /reviews resource, even though reviews are part of the courses table
+        Resource reviewsResource = api.getRoot().addResource("reviews");
+        reviewsResource.addMethod("ANY", proxyIntegration);
 
-        // Set up the POST method for /echo endpoint
-        echoResource.addMethod("POST", echoIntegration); // Allow POST requests to /echo
+        // Define the /authenticate resource
+        Resource authResource = api.getRoot().addResource("authenticate");
+        authResource.addMethod("POST", proxyIntegration);
     }
 }
