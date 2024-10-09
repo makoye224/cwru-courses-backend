@@ -10,5 +10,8 @@
         <module name="cdk" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="models" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

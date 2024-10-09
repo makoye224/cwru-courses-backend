@@ -1,1 +1,13 @@
-/Users/makoye/Desktop/sokoni/lambda/src/main/java/com/example/lambda/App.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/App.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/dao/CourseDao.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/handlers/AuthenticationHandler.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/handlers/CoursesHandler.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/handlers/ReviewsHandler.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/handlers/SearchHandler.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/models/Course.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/models/CourseOutput.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/models/Review.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/util/CourseConverter.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/util/CourseSearch.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/validators/CourseValidator.java
+/Users/makoye/Desktop/cwru-courses-backend/aws/lambda/src/main/java/com/example/lambda/validators/ReviewValidator.java
