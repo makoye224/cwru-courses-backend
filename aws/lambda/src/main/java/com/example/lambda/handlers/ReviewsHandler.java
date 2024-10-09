@@ -2,12 +2,11 @@ package com.example.lambda.handlers;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.example.lambda.dao.CourseDao;
-import com.example.lambda.models.Course;
 import com.example.lambda.models.CourseOutput;
 import com.example.lambda.models.Review;
 import com.example.lambda.util.CourseConverter;
+import com.example.lambda.validators.ReviewValidator;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +18,11 @@ public class ReviewsHandler {
     private static final Logger logger = LoggerFactory.getLogger(ReviewsHandler.class);
     private final CourseDao courseDao;
     private final Gson gson;
+    private final ReviewValidator validator;
 
     public ReviewsHandler(CourseDao courseDao) {
         this.courseDao = courseDao;
+        this.validator = new ReviewValidator();
         this.gson = new Gson();
     }
 
@@ -54,8 +55,15 @@ public class ReviewsHandler {
 
             logger.info("parsed review {}", newReview);
 
-            // Generate a unique ID for the new review
-            newReview.setReviewId(UUID.randomUUID().toString());
+            // Validate the review
+            List<String> validationErrors = validator.validateReview(newReview);
+
+            if (!validationErrors.isEmpty()) {
+                // If there are errors, return a 400 Bad Request response with the error messages
+                response.setStatusCode(400);
+                response.setBody(String.join(", ", validationErrors));  // Combine errors into a single string
+                return response;
+            }
 
             // Get the course by ID
             CourseOutput courseOutput = courseDao.getCourseById(courseId);
@@ -92,6 +100,16 @@ public class ReviewsHandler {
             // Parse the request body into a Review object
             Review updatedReview = gson.fromJson(body, Review.class);
             updatedReview.setReviewId(reviewId);  // Ensure the reviewId remains the same
+
+            // Validate the course
+            List<String> validationErrors = validator.validateForUpdate(updatedReview);
+
+            if (!validationErrors.isEmpty()) {
+                // If there are errors, return a 400 Bad Request response with the error messages
+                response.setStatusCode(400);
+                response.setBody(String.join(", ", validationErrors));  // Combine errors into a single string
+                return response;
+            }
 
             // Get the course by ID
             CourseOutput courseOutput = courseDao.getCourseById(courseId);

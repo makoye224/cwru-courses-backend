@@ -89,7 +89,7 @@ public class CoursesHandler {
 
                 // Set response success message for creation
                 response.setStatusCode(201);  // Created
-                response.setBody("Course created successfully!");
+                response.setBody(serialize("Course created successfully!"));
 
 
         } catch (Exception e) {
@@ -162,7 +162,7 @@ public class CoursesHandler {
 
                 // Set response success message for deletion
                 response.setStatusCode(200);  // OK
-                response.setBody("Course deleted successfully!");
+                response.setBody(serialize("Course deleted successfully!"));
             } else {
                 // If the course is not found
                 response.setStatusCode(404);  // Not found

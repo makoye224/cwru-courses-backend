@@ -3,6 +3,7 @@ package com.example.lambda.dao;
 import com.example.lambda.models.Course;
 import com.example.lambda.models.CourseOutput;
 import com.example.lambda.util.CourseConverter;
+import com.example.lambda.util.CourseSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.enhanced.dynamodb.*;
@@ -16,6 +17,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CourseDao {
     private static final Logger logger = LoggerFactory.getLogger(CourseDao.class);
@@ -108,4 +111,16 @@ public class CourseDao {
             logger.error("Failed to delete course", e);
         }
     }
+
+    // Updated search method to filter and rank courses
+    public List<CourseOutput> searchCourses(String searchString) {
+        // Retrieve all courses (scanning the whole table)
+        List<CourseOutput> allCourses = getAllCourses();
+        if(allCourses.isEmpty()) {
+            logger.info("No courses found in the database");
+            throw new RuntimeException("No courses found in the database");
+        }
+        return CourseSearch.searchCourses(allCourses, searchString);
+    }
+
 }
