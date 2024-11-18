@@ -31,7 +31,7 @@ public class SearchHandler {
             // Ensure the search string is not null or empty
             if (searchString == null || searchString.trim().isEmpty()) {
                 response.setStatusCode(400);
-                response.setBody("No search parameters provided.");
+                response.setBody(serialize("No search parameters provided."));
                 return response;
             }
 
@@ -53,13 +53,13 @@ public class SearchHandler {
                 response.setBody(serialize(courses));
             } else {
                 response.setStatusCode(404);
-                response.setBody("No courses found for the given search criteria.");
+                response.setBody(serialize("No courses found for the given search criteria."));
             }
 
         } catch (Exception e) {
             logger.error("Error searching courses: {}", e.getMessage());
             response.setStatusCode(500);
-            response.setBody("Error searching courses.");
+            response.setBody(serialize("Error searching courses."));
         }
 
         return response;

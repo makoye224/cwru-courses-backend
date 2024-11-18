@@ -39,7 +39,7 @@ public class ReviewsHandler {
                 return deleteReview(courseId, reviewId);
             default:
                 response.setStatusCode(405); // Method Not Allowed
-                response.setBody("Method Not Allowed");
+                response.setBody(serialize("Method Not Allowed"));
                 logger.warn("Invalid HTTP method: {}", httpMethod);
                 break;
         }
@@ -61,7 +61,7 @@ public class ReviewsHandler {
             if (!validationErrors.isEmpty()) {
                 // If there are errors, return a 400 Bad Request response with the error messages
                 response.setStatusCode(400);
-                response.setBody(String.join(", ", validationErrors));  // Combine errors into a single string
+                response.setBody(serialize(String.join(", ", validationErrors)));  // Combine errors into a single string
                 return response;
             }
 
@@ -70,7 +70,7 @@ public class ReviewsHandler {
 
             if (courseOutput == null) {
                 response.setStatusCode(404);
-                response.setBody("Course not found");
+                response.setBody(serialize("Course not found"));
                 return response;
             }
 
@@ -83,11 +83,11 @@ public class ReviewsHandler {
             courseDao.saveCourse(CourseConverter.convertToCourse(courseOutput));
 
             response.setStatusCode(201);  // Created
-            response.setBody("Review added successfully");
+            response.setBody(serialize("Review added successfully"));
         } catch (Exception e) {
             logger.error("Error creating review: {}", e.getMessage());
             response.setStatusCode(500);  // Internal server error
-            response.setBody("Error creating review");
+            response.setBody(serialize("Error creating review"));
         }
 
         return response;
@@ -107,7 +107,7 @@ public class ReviewsHandler {
             if (!validationErrors.isEmpty()) {
                 // If there are errors, return a 400 Bad Request response with the error messages
                 response.setStatusCode(400);
-                response.setBody(String.join(", ", validationErrors));  // Combine errors into a single string
+                response.setBody(serialize(String.join(", ", validationErrors)));  // Combine errors into a single string
                 return response;
             }
 
@@ -116,7 +116,7 @@ public class ReviewsHandler {
 
             if (courseOutput == null) {
                 response.setStatusCode(404);
-                response.setBody("Course not found");
+                response.setBody(serialize("Course not found"));
                 return response;
             }
 
@@ -134,7 +134,7 @@ public class ReviewsHandler {
 
             if (!reviewFound) {
                 response.setStatusCode(404);
-                response.setBody("Review not found");
+                response.setBody(serialize("Review not found"));
                 return response;
             }
 
@@ -143,11 +143,11 @@ public class ReviewsHandler {
             courseDao.saveCourse(CourseConverter.convertToCourse(courseOutput));
 
             response.setStatusCode(200);  // OK
-            response.setBody("Review updated successfully");
+            response.setBody(serialize("Review updated successfully"));
         } catch (Exception e) {
             logger.error("Error updating review: {}", e.getMessage());
             response.setStatusCode(500);  // Internal server error
-            response.setBody("Error updating review");
+            response.setBody(serialize("Error updating review"));
         }
 
         return response;
@@ -162,7 +162,7 @@ public class ReviewsHandler {
 
             if (courseOutput == null) {
                 response.setStatusCode(404);
-                response.setBody("Course not found");
+                response.setBody(serialize("Course not found"));
                 return response;
             }
 
@@ -172,7 +172,7 @@ public class ReviewsHandler {
 
             if (!reviewFound) {
                 response.setStatusCode(404);
-                response.setBody("Review not found");
+                response.setBody(serialize("Review not found"));
                 return response;
             }
 
@@ -181,13 +181,18 @@ public class ReviewsHandler {
             courseDao.saveCourse(CourseConverter.convertToCourse(courseOutput));
 
             response.setStatusCode(200);  // OK
-            response.setBody("Review deleted successfully");
+            response.setBody(serialize("Review deleted successfully"));
         } catch (Exception e) {
             logger.error("Error deleting review: {}", e.getMessage());
             response.setStatusCode(500);  // Internal server error
-            response.setBody("Error deleting review");
+            response.setBody(serialize("Error deleting review"));
         }
 
         return response;
+    }
+
+    // Method to serialize an object to JSON string using Gson
+    private <T> String serialize(T object) {
+        return gson.toJson(object);
     }
 }
