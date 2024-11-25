@@ -136,5 +136,27 @@ public class CourseDao {
         }
     }
 
+    // Search for courses by name
+    public List<CourseOutput> getCoursesByName(String name) {
+        DynamoDbIndex<Course> nameIndex = courseTable.index("NameIndex");
+
+        QueryEnhancedRequest queryRequest = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.keyEqualTo(Key.builder()
+                        .partitionValue(name)
+                        .build()))
+                .build();
+
+        List<CourseOutput> courseOutputs = new ArrayList<>();
+        Iterator<Page<Course>> results = nameIndex.query(queryRequest).iterator();
+
+        while (results.hasNext()) {
+            Page<Course> page = results.next();
+            page.items().forEach(course -> courseOutputs.add(CourseConverter.convertToCourseOutput(course)));
+        }
+
+        return courseOutputs;
+    }
+
+
 
 }

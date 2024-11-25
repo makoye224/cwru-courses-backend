@@ -5,6 +5,7 @@ import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.constructs.Construct;
 
+
 public class DynamoDbStack extends Stack {
     public final Table coursesTable;
 
@@ -49,24 +50,25 @@ public class DynamoDbStack extends Stack {
                 .projectionType(ProjectionType.ALL) // Include all fields in the query result
                 .build());
 
-//// GSI for querying by major
-//        coursesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
-//                .indexName("MajorIndex")
-//                .partitionKey(Attribute.builder()
-//                        .name("major")
-//                        .type(AttributeType.STRING)
-//                        .build())
-//                .projectionType(ProjectionType.ALL)
-//                .build());
-//
-//        // GSI for querying by professor
-//        coursesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
-//                .indexName("ProfessorIndex")
-//                .partitionKey(Attribute.builder()
-//                        .name("professor")
-//                        .type(AttributeType.STRING)
-//                        .build())
-//                .projectionType(ProjectionType.ALL)
-//                .build());
-   }
+        // GSI for querying by code
+        coursesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
+                .indexName("CodeIndex")
+                .partitionKey(Attribute.builder()
+                        .name("code")
+                        .type(AttributeType.STRING)
+                        .build())
+                .projectionType(ProjectionType.ALL) // Include all fields in the query result
+                .build());
+
+        // GSI for querying by name
+        coursesTable.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
+                .indexName("NameIndex")
+                .partitionKey(Attribute.builder()
+                        .name("name")
+                        .type(AttributeType.STRING)
+                        .build())
+                .projectionType(ProjectionType.ALL) // Include all fields in the query result
+                .build());
+
+    }
 }

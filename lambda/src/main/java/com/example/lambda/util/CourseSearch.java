@@ -42,8 +42,32 @@ public class CourseSearch {
 
     // Check if the course code matches the search query
     private static boolean matchesCode(CourseOutput course, String searchQuery) {
-        return course.getCode() != null && course.getCode().toLowerCase().contains(searchQuery.toLowerCase());
+        if (course.getCode() == null || searchQuery == null) {
+            return false;
+        }
+
+        // Normalize both the course code and search query (remove all Unicode whitespace and convert to lowercase)
+        String normalizedCode = course.getCode()
+                .replaceAll("\\s+", "")        // Remove standard whitespace
+                .replaceAll("\\u00A0", "")     // Remove non-breaking spaces
+                .toLowerCase();
+        String normalizedQuery = searchQuery
+                .replaceAll("\\s+", "")        // Remove standard whitespace
+                .replaceAll("\\u00A0", "")     // Remove non-breaking spaces
+                .toLowerCase();
+
+        logger.info("query: {}", normalizedQuery);
+        logger.info("courseCode: {}", normalizedCode);
+
+        // Check for an exact match
+        if (normalizedCode.equals(normalizedQuery)) {
+            return true;
+        }
+
+        // Check for a partial match
+        return normalizedCode.contains(normalizedQuery);
     }
+
 
     // Check if the course name matches the search query
     private static boolean matchesName(CourseOutput course, String searchQuery) {
