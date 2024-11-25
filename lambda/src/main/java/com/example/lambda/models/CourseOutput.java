@@ -4,16 +4,47 @@ import java.util.List;
 
 public class CourseOutput {
     private String courseId;
-    private String title;
+    private String code;
+    private String name;
     private String createdBy;
     private String createdAt;
     private String description;
     private List<String> aliases;
     private List<String> prerequisites;
     private List<Review> reviews;
+    private String title;
+    private List<String> professors;
 
     public CourseOutput() {
         // Default constructor
+    }
+
+    public List<String> getProfessors() {
+        return professors;
+    }
+
+    public void setProfessors(List<String> professors) {
+        this.professors = professors;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     // Getters and setters for all fields
@@ -26,11 +57,7 @@ public class CourseOutput {
     }
 
     public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+        return code + " " + name;
     }
 
     public String getCreatedBy() {
@@ -85,7 +112,7 @@ public class CourseOutput {
     public String toString() {
         return "CourseOutput{" +
                 "courseId='" + courseId + '\'' +
-                ", title='" + title + '\'' +
+                ", title='" + name + " " + code + '\'' +
                 ", createdBy='" + createdBy + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 ", description='" + description + '\'' +

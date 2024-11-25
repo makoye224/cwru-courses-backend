@@ -28,7 +28,7 @@ public class CoursesHandler {
         validator = new CourseValidator();
     }
 
-    public APIGatewayProxyResponseEvent handleCoursesRequest(String httpMethod, String body, String courseId) {
+    public APIGatewayProxyResponseEvent handleCoursesRequest(String httpMethod, String body, String name, String code) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         if ("POST".equalsIgnoreCase(httpMethod)) {
@@ -36,13 +36,13 @@ public class CoursesHandler {
             return createCourse(body);
         }
         else if("DELETE".equalsIgnoreCase(httpMethod)) {
-           return deleteCourse(courseId);
+           return deleteCourse(name, code);
         }
         else if ("GET".equalsIgnoreCase(httpMethod)) {
             // Handle getting course(s)
-            if (courseId != null && !courseId.isEmpty()) {
+            if (name != null && !name.isEmpty() && code != null && !code.isEmpty()) {
                 // If courseId is provided, fetch the specific course
-                return getSingleCourse(courseId);
+                return getSingleCourse(name, code);
             } else {
                 // If no courseId is provided, fetch all courses
                 return getAllCourses();
@@ -103,12 +103,12 @@ public class CoursesHandler {
     }
 
     // Handle getting a single course by courseId
-    private APIGatewayProxyResponseEvent getSingleCourse(String courseId) {
+    private APIGatewayProxyResponseEvent getSingleCourse(String name, String code) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
             // Get a single course by courseId
-            CourseOutput course = courseDao.getCourseById(courseId);
+            CourseOutput course = courseDao.getCourseByNameAndCode(name, code);
             if (course != null) {
                 response.setStatusCode(200);
                 response.setBody(serialize(course));
@@ -149,16 +149,16 @@ public class CoursesHandler {
     }
 
     // Handle deleting a course by courseId
-    private APIGatewayProxyResponseEvent deleteCourse(String courseId) {
+    private APIGatewayProxyResponseEvent deleteCourse(String name, String code) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
             // Check if the course exists
-            CourseOutput course = courseDao.getCourseById(courseId);
+            CourseOutput course = courseDao.getCourseByNameAndCode(name, code);
 
             if (course != null) {
                 // Delete the course
-                courseDao.deleteCourse(courseId);
+                courseDao.deleteCourse(name, code);
 
                 // Set response success message for deletion
                 response.setStatusCode(200);  // OK

@@ -10,8 +10,7 @@ import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ReviewsHandler {
 
@@ -26,17 +25,17 @@ public class ReviewsHandler {
         this.gson = new Gson();
     }
 
-    public APIGatewayProxyResponseEvent handleReviewsRequest(String httpMethod, String body, String courseId, String reviewId) {
+    public APIGatewayProxyResponseEvent handleReviewsRequest(String httpMethod, String body, String name, String code, String reviewId) {
         logger.info("entered handleReviewsRequest");
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         switch (httpMethod) {
             case "POST":
-                return createReview(body, courseId);
+                return createReview(body, name, code);
             case "PUT":
-                return updateReview(body, courseId, reviewId);
+                return updateReview(body, name, code, reviewId);
             case "DELETE":
-                return deleteReview(courseId, reviewId);
+                return deleteReview(name, code, reviewId);
             default:
                 response.setStatusCode(405); // Method Not Allowed
                 response.setBody(serialize("Method Not Allowed"));
@@ -46,8 +45,7 @@ public class ReviewsHandler {
         return response;
     }
 
-    // Method to create a new review
-    private APIGatewayProxyResponseEvent createReview(String body, String courseId) {
+    private APIGatewayProxyResponseEvent createReview(String body, String name, String code) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         try {
             // Parse the request body into a Review object
@@ -65,14 +63,24 @@ public class ReviewsHandler {
                 return response;
             }
 
-            // Get the course by ID
-            CourseOutput courseOutput = courseDao.getCourseById(courseId);
+            // Get the course by name and code
+            CourseOutput courseOutput = courseDao.getCourseByNameAndCode(name, code);
 
             if (courseOutput == null) {
                 response.setStatusCode(404);
                 response.setBody(serialize("Course not found"));
                 return response;
             }
+
+            // Extract professor from the new review and update the professors list if necessary
+            String professorName = newReview.getProfessor();
+            List<String> professorList = courseOutput.getProfessors();
+
+            // Add the professor to the list if it's not already there
+             professorList.add(professorName);
+
+            // Update the professors list in the course output
+            courseOutput.setProfessors(professorList);
 
             // Add the new review to the course
             List<Review> reviews = courseOutput.getReviews();
@@ -94,7 +102,7 @@ public class ReviewsHandler {
     }
 
     // Method to update an existing review
-    private APIGatewayProxyResponseEvent updateReview(String body, String courseId, String reviewId) {
+    private APIGatewayProxyResponseEvent updateReview(String body, String name, String code, String reviewId) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         try {
             // Parse the request body into a Review object
@@ -112,7 +120,7 @@ public class ReviewsHandler {
             }
 
             // Get the course by ID
-            CourseOutput courseOutput = courseDao.getCourseById(courseId);
+            CourseOutput courseOutput = courseDao.getCourseByNameAndCode(name, code);
 
             if (courseOutput == null) {
                 response.setStatusCode(404);
@@ -138,6 +146,18 @@ public class ReviewsHandler {
                 return response;
             }
 
+            // Extract the professor from the updated review and ensure the professors list is up-to-date
+            String professorName = updatedReview.getProfessor();
+            List<String> professorList = courseOutput.getProfessors();
+
+            // Add the professor to the list if it's not already there
+            if (!professorList.contains(professorName)) {
+                professorList.add(professorName);
+            }
+
+            // Update the professors list in the course output
+            courseOutput.setProfessors(professorList);
+
             // Save the updated course with the modified review
             courseOutput.setReviews(reviews);
             courseDao.saveCourse(CourseConverter.convertToCourse(courseOutput));
@@ -154,11 +174,11 @@ public class ReviewsHandler {
     }
 
     // Method to delete an existing review
-    private APIGatewayProxyResponseEvent deleteReview(String courseId, String reviewId) {
+    private APIGatewayProxyResponseEvent deleteReview(String name, String code, String reviewId) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         try {
             // Get the course by ID
-            CourseOutput courseOutput = courseDao.getCourseById(courseId);
+            CourseOutput courseOutput = courseDao.getCourseByNameAndCode(name, code);
 
             if (courseOutput == null) {
                 response.setStatusCode(404);
@@ -174,6 +194,27 @@ public class ReviewsHandler {
                 response.setStatusCode(404);
                 response.setBody(serialize("Review not found"));
                 return response;
+            }
+
+            // If the review was deleted, we may need to update the professors list.
+            // Check if the professor associated with the review should be removed.
+            Review removedReview = null;
+            for (Review review : courseOutput.getReviews()) {
+                if (review.getReviewId().equals(reviewId)) {
+                    removedReview = review;
+                    break;
+                }
+            }
+
+            if (removedReview != null) {
+                String professorName = removedReview.getProfessor();
+                List<String> professorList =courseOutput.getProfessors();
+
+                // Remove the professor from the list if they exist
+                professorList.remove(professorName);
+
+                // Update the professors list in the course output
+                courseOutput.setProfessors(Collections.singletonList(String.join(",", professorList)));
             }
 
             // Save the updated course without the deleted review

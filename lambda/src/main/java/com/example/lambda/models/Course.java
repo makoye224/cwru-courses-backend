@@ -2,48 +2,47 @@ package com.example.lambda.models;
 
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-
 
 @DynamoDbBean
 public class Course {
-    private String courseId;  // Partition key
-    private String title;
-    private String createdBy;  // Attribute, used in GSI
+    private String courseId;  // Unique identifier
+    private String code;      // e.g., CSDS 101
+    private String name;      // e.g., Discrete Mathematics
+    private String createdBy;
     private String createdAt;
     private String description;
+    private String aliases;
+    private String prerequisites;
+    private String reviews;
+    private String title;
+    private String professors;
 
-    // Store lists as JSON strings in DynamoDB
-    private String aliases;  // JSON string for aliases
-    private String prerequisites;  // JSON string for prerequisites
-    private String reviews;  // JSON string for reviews
-
-    // Constructor
-    public Course() {
-        // Default constructor
+    @DynamoDbSortKey
+    @DynamoDbAttribute("code")
+    public String getCode() {
+        return code;
     }
 
-    // Partition key for DynamoDB
+    public String getProfessors() {
+        return professors;
+    }
+
+    public void setProfessors(String professors) {
+        this.professors = professors;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     @DynamoDbPartitionKey
-    public String getCourseId() {
-        return courseId;
+    @DynamoDbAttribute("name")
+    public String getName() {
+        return name;
     }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
-
-    // Attribute for createdBy (used in the GSI)
-    @DynamoDbAttribute("createdBy")
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    @DynamoDbAttribute("title")
     public String getTitle() {
         return title;
     }
@@ -52,7 +51,26 @@ public class Course {
         this.title = title;
     }
 
-    @DynamoDbAttribute("createdAt")
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -61,7 +79,6 @@ public class Course {
         this.createdAt = createdAt;
     }
 
-    @DynamoDbAttribute("description")
     public String getDescription() {
         return description;
     }
@@ -70,8 +87,6 @@ public class Course {
         this.description = description;
     }
 
-    // Store aliases as JSON string in DynamoDB
-    @DynamoDbAttribute("aliases")
     public String getAliases() {
         return aliases;
     }
@@ -80,8 +95,6 @@ public class Course {
         this.aliases = aliases;
     }
 
-    // Store prerequisites as JSON string in DynamoDB
-    @DynamoDbAttribute("prerequisites")
     public String getPrerequisites() {
         return prerequisites;
     }
@@ -90,8 +103,6 @@ public class Course {
         this.prerequisites = prerequisites;
     }
 
-    // Store reviews as JSON string in DynamoDB
-    @DynamoDbAttribute("reviews")
     public String getReviews() {
         return reviews;
     }
@@ -104,7 +115,9 @@ public class Course {
     public String toString() {
         return "Course{" +
                 "courseId='" + courseId + '\'' +
-                ", title='" + title + '\'' +
+                ", code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", title='" + code + " " + name + '\'' +
                 ", createdBy='" + createdBy + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 ", description='" + description + '\'' +

@@ -48,20 +48,8 @@ public class CourseDao {
             logger.info("Successfully saved course: " + course.getTitle());
         } catch (Exception e) {
             logger.error("Failed to save course", e);
-        }
-    }
+            throw new RuntimeException(e);
 
-    // Get a course using only the courseId (primary key)
-    public CourseOutput getCourseById(String courseId) {
-        Course course = courseTable.getItem(Key.builder()
-                .partitionValue(courseId)
-                .build());
-
-        if (course != null) {
-            // Use the CourseConverter to handle deserialization
-            return CourseConverter.convertToCourseOutput(course);
-        } else {
-            return null;  // No course found
         }
     }
 
@@ -99,16 +87,17 @@ public class CourseDao {
     }
 
     // Method to delete a course using DynamoDbEnhancedClient
-    public void deleteCourse(String courseId) {
+    public void deleteCourse(String name, String code) {
         try {
-            // Delete the course by courseId
+            // Delete the course by using both the partition key (name) and sort key (code)
             courseTable.deleteItem(Key.builder()
-                    .partitionValue(courseId)
+                    .partitionValue(name)  // Use name as partition key
+                    .sortValue(code)       // Use code as sort key
                     .build());
 
-            logger.info("Successfully deleted course with courseId: " + courseId);
+            logger.info("Successfully deleted course with name: " + name + " and code: " + code);
         } catch (Exception e) {
-            logger.error("Failed to delete course", e);
+            logger.error("Failed to delete course with name: " + name + " and code: " + code, e);
         }
     }
 
@@ -122,5 +111,30 @@ public class CourseDao {
         }
         return CourseSearch.searchCourses(allCourses, searchString);
     }
+
+    public CourseOutput getCourseByNameAndCode(String name, String code) {
+        // Create a query request with both partition key (name) and sort key (code)
+        QueryEnhancedRequest queryRequest = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.keyEqualTo(
+                        Key.builder()
+                                .partitionValue(name)   // Partition key: name
+                                .sortValue(code)        // Sort key: code
+                                .build()))
+                .build();
+
+        // Execute the query
+        Iterator<Page<Course>> results = courseTable.query(queryRequest).iterator();
+        if (results.hasNext()) {
+            Page<Course> page = results.next();
+            Course course = page.items().get(0); // Assuming we only expect one item
+
+            // Convert the Course object to CourseOutput
+            return CourseConverter.convertToCourseOutput(course);
+        } else {
+            logger.error("No course Found");
+            throw new RuntimeException("No course Found");
+        }
+    }
+
 
 }

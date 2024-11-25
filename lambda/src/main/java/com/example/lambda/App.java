@@ -7,7 +7,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.example.lambda.dao.CourseDao;
 import com.example.lambda.handlers.CoursesHandler;
 import com.example.lambda.handlers.ReviewsHandler;
-import com.example.lambda.handlers.AuthenticationHandler;
 import com.example.lambda.handlers.SearchHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
     // Instantiate handler classes with injected DAOs
     private final CoursesHandler coursesHandler = new CoursesHandler(courseDao);
     private final ReviewsHandler reviewsHandler = new ReviewsHandler(courseDao);
-    private final AuthenticationHandler authenticationHandler = new AuthenticationHandler();
     private final SearchHandler searchHandler = new SearchHandler(courseDao);
 
 
@@ -41,10 +39,14 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
 
         String courseId = null;
         String reviewId = null;
+        String courseName = null;
+        String courseCode = null;
 
         // Extract courseId from the path parameters (if it's part of the path)
         if (input.getPathParameters() != null) {
             courseId = input.getPathParameters().get("courseId");
+            courseName = input.getPathParameters().get("name");
+            courseCode = input.getPathParameters().get("code");
             reviewId = input.getPathParameters().get("reviewId");
         }
 
@@ -52,6 +54,8 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         if ((courseId == null || reviewId == null) && input.getQueryStringParameters() != null) {
             courseId = input.getQueryStringParameters().get("courseId");
             reviewId = input.getQueryStringParameters().get("reviewId");
+            courseName = input.getQueryStringParameters().get("name");
+            courseCode = input.getQueryStringParameters().get("code");
         }
 
         // Log the extracted courseId
@@ -62,16 +66,14 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
 
         // Route the request based on path
         if (path.startsWith("/courses")) {
-            response = coursesHandler.handleCoursesRequest(httpMethod, body, courseId);
+            response = coursesHandler.handleCoursesRequest(httpMethod, body, courseName, courseCode);
         } else if (path.startsWith("/reviews")) {
-            response = reviewsHandler.handleReviewsRequest(httpMethod, body, courseId, reviewId);
+            response = reviewsHandler.handleReviewsRequest(httpMethod, body, courseName, courseCode, reviewId);
         }
         else if (path.startsWith("/search")) {
             response = searchHandler.handleSearchRequest(body);
         }
-        else if (path.startsWith("/authenticate")) {
-            response = authenticationHandler.handleAuthenticationRequest(httpMethod, body);
-        } else {
+         else {
             // If the path does not match any known endpoint, return a 404 response
             response.setStatusCode(404);
             response.setBody("Not Found");

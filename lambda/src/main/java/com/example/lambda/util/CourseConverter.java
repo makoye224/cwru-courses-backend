@@ -18,10 +18,12 @@ public class CourseConverter {
         CourseOutput courseOutput = new CourseOutput();
 
         courseOutput.setCourseId(course.getCourseId());
-        courseOutput.setTitle(course.getTitle());
         courseOutput.setCreatedBy(course.getCreatedBy());
         courseOutput.setCreatedAt(course.getCreatedAt());
         courseOutput.setDescription(course.getDescription());
+        courseOutput.setCode(course.getCode());
+        courseOutput.setName(course.getName());
+        courseOutput.setTitle(course.getTitle());
 
         // Deserialize JSON strings back to lists
         if (course.getAliases() != null) {
@@ -34,6 +36,10 @@ public class CourseConverter {
             Type reviewListType = new TypeToken<List<Review>>() {}.getType();
             courseOutput.setReviews(gson.fromJson(course.getReviews(), reviewListType));
         }
+        if(course.getProfessors() != null) {
+            Type professorListType = new TypeToken<List<String>>() {}.getType();
+            courseOutput.setProfessors(gson.fromJson(course.getProfessors(), professorListType));
+        }
 
         return courseOutput;
     }
@@ -43,10 +49,12 @@ public class CourseConverter {
         Course course = new Course();
 
         course.setCourseId(courseOutput.getCourseId());
-        course.setTitle(courseOutput.getTitle());
         course.setCreatedBy(courseOutput.getCreatedBy());
         course.setCreatedAt(courseOutput.getCreatedAt());
         course.setDescription(courseOutput.getDescription());
+        course.setCode(courseOutput.getCode());
+        course.setName(courseOutput.getName());
+        course.setTitle(courseOutput.getTitle());
 
         // Convert lists to JSON strings before setting them in the Course object
         if (courseOutput.getAliases() != null) {
@@ -59,7 +67,10 @@ public class CourseConverter {
             Type reviewListType = new TypeToken<List<Review>>() {}.getType();
             course.setReviews(gson.toJson(courseOutput.getReviews(), reviewListType));
         }
-
+        if (courseOutput.getProfessors() != null) {
+            Type professorListType = new TypeToken<List<String>>() {}.getType();
+            course.setProfessors(gson.toJson(courseOutput.getProfessors(), professorListType));
+        }
         return course;
     }
 }
