@@ -18,11 +18,15 @@ public class DynamoDbStack extends Stack {
         // Create the DynamoDB table with courseId as the primary key
         coursesTable = Table.Builder.create(this, "CoursesTable")
                 .partitionKey(Attribute.builder()
-                        .name("courseId")
+                        .name("name")  // Use code as partition key
+                        .type(AttributeType.STRING)
+                        .build())
+                .sortKey(Attribute.builder()
+                        .name("code")
                         .type(AttributeType.STRING)
                         .build())
                 .tableName("Courses")
-                .billingMode(BillingMode.PAY_PER_REQUEST) // Adjust as needed
+                .billingMode(BillingMode.PAY_PER_REQUEST)  // Adjust as needed
                 .build();
 
         // GSI for querying by createdBy
